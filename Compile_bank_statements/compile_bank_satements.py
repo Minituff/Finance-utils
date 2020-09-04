@@ -21,8 +21,10 @@ class Transaction:
         self.description: str
         self.category: Optional[str]
         self.bank_name: str
-
-
+        
+    def __repr__(self) -> str:
+        return f"{self.bank_name} - {self.amount}$ - {self.date} - {self.description} - {self.category}"
+    
 class CompileBanks:
     def __init__(self) -> None:
         self.input_path: str = os.path.dirname(os.path.realpath(__file__))
