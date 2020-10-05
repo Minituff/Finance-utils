@@ -50,6 +50,20 @@ class BankColumnMaifest:
         # Set the category to NONE to filter this match out
         self.amount_category_manifest: List[Tuple[str, float, Optional[str]]] = amount_category_manifest
 
+    def __repr__(self):
+        return str({
+            "bank_name": self.name,
+            "headers": self.headers,
+            "date": self.date,
+            "description": self.description,
+            "category": self.category,
+            "transaction_type": self.transaction_type,
+            "debit_credit": self.debit_credit,
+            "amount": self.amount,
+            "regex_filters": self.regex_filters,
+            "amount_category_manifest": self.amount_category_manifest,
+        })
+
 
 # This is a list of banks that the script will know about. Add as many as you want here
 # The bank_name MUST be contained in the csv file name

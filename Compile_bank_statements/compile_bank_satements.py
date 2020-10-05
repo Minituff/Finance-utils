@@ -95,7 +95,9 @@ class CompileBanks:
     @staticmethod
     def get_amount_from_row(bank: BankColumnMaifest, row) -> float:
         if bank.amount:
-            return row[bank.amount]
+            if str(row[bank.amount]).startswith('--'):
+                return float(row[bank.amount][2:])
+            return float(row[bank.amount])
 
         if bank.debit_credit:
             deb: float = row[bank.debit_credit[0]]
