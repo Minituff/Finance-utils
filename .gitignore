@@ -125,4 +125,5 @@ dmypy.json
 
 # Ignore any actual statments
 /Compile_bank_statements/*.csv
+/Compile_bank_statements/data/*.csv
 .vscode/

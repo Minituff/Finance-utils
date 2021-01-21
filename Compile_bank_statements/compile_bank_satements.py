@@ -2,6 +2,7 @@
 import os
 import re
 from datetime import datetime
+from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
 import pandas as pd
@@ -10,7 +11,7 @@ from dateutil.parser import parse as parsedate
 # The python language server has issues with local imports
 # * Chaning `config` to `.config` will enable intellisense but breaks the code. Will update once a fix is out
 from config import (BANK_MANIFEST, CATEGORY_MANIFEST,  # type:ignore
-                    BankColumnMaifest)
+                    DATA_FOLDER, BankColumnMaifest)
 
 
 class Transaction:
@@ -27,10 +28,13 @@ class Transaction:
     
 class CompileBanks:
     def __init__(self) -> None:
-        self.input_path: str = os.path.dirname(os.path.realpath(__file__))
+        self.input_path: Path = Path(os.path.dirname(os.path.realpath(__file__)) + "/" + DATA_FOLDER)
+        if not self.input_path.exists():
+            print("Creating directory: " + str(self.input_path))
+            os.makedirs(self.input_path)
         # timestamp = f'{datetime.now().strftime("%Y-%m-%d-%H%M")}'
-        self.expenses_output_path: str = os.path.join(self.input_path, "expenses_out.csv")
-        self.income_output_path: str = os.path.join(self.input_path, "income_out.csv")
+        self.expenses_output_path: str = os.path.join(self.input_path, "Compiled expenses.csv")
+        self.income_output_path: str = os.path.join(self.input_path, "Compiled Income.csv")
 
         self.column_manifest: List[BankColumnMaifest] = BANK_MANIFEST
         
@@ -49,7 +53,7 @@ class CompileBanks:
             files.append(os.path.join(self.input_path, filename))
         
         if not files:
-            print('No files detected. Plase the statements in the same folder as this script, at:', self.input_path)
+            print('No files detected. Plase the statements in the this folder:', self.input_path)
         return files
 
     def get_bank_manifest_from_path(self, file_path: str) -> Optional[BankColumnMaifest]:
@@ -62,27 +66,31 @@ class CompileBanks:
     @staticmethod
     def assign_index_from_col_name(bank: BankColumnMaifest, cols: List[str]):
         """Replaces all strings with ints in the bank manifest. Allows for quick index access"""
-        if isinstance(bank.date, str):
-            bank.date = cols.index(bank.date)
-        if isinstance(bank.description, str):
-            bank.description = cols.index(bank.description)
-        if isinstance(bank.category, str):
-            bank.category = cols.index(bank.category)
-        if isinstance(bank.transaction_type, str):
-            bank.transaction_type = cols.index(bank.transaction_type)
-        if isinstance(bank.amount, str):
-            bank.amount = cols.index(bank.amount)
-        if isinstance(bank.debit_credit, tuple):
-            debit_credit_l = []
-            if isinstance(bank.debit_credit[0], str):
-                debit_credit_l = [cols.index(str(bank.debit_credit[0])), bank.debit_credit[1]]
-            if isinstance(bank.debit_credit[1], str):
-                if not debit_credit_l:
-                    debit_credit_l = [bank.debit_credit[0], cols.index(str(bank.debit_credit[1]))]
-                else:
-                    debit_credit_l = [debit_credit_l[0], cols.index(str(bank.debit_credit[1]))]
-            if debit_credit_l:
-                bank.debit_credit = (debit_credit_l[0], debit_credit_l[1])
+        try:
+            if isinstance(bank.date, str):
+                bank.date = cols.index(bank.date)
+            if isinstance(bank.description, str):
+                bank.description = cols.index(bank.description)
+            if isinstance(bank.category, str):
+                bank.category = cols.index(bank.category)
+            if isinstance(bank.transaction_type, str):
+                bank.transaction_type = cols.index(bank.transaction_type)
+            if isinstance(bank.amount, str):
+                bank.amount = cols.index(bank.amount)
+            if isinstance(bank.debit_credit, tuple):
+                debit_credit_l = []
+                if isinstance(bank.debit_credit[0], str):
+                    debit_credit_l = [cols.index(str(bank.debit_credit[0])), bank.debit_credit[1]]
+                if isinstance(bank.debit_credit[1], str):
+                    if not debit_credit_l:
+                        debit_credit_l = [bank.debit_credit[0], cols.index(str(bank.debit_credit[1]))]
+                    else:
+                        debit_credit_l = [debit_credit_l[0], cols.index(str(bank.debit_credit[1]))]
+                if debit_credit_l:
+                    bank.debit_credit = (debit_credit_l[0], debit_credit_l[1])
+        except ValueError as e:
+            # TODO: Add color here
+            print(f"Error with bank: {bank.name}. Ensure the columns in the csv match the bank manifest - {e.args[0]}")
 
     @staticmethod
     def get_date_from_row(bank: BankColumnMaifest, row) -> datetime:
@@ -118,7 +126,7 @@ class CompileBanks:
     def filter_transatction(bank: BankColumnMaifest, desc: str) -> bool:
         """Returns true if the purchase should be filtered"""
         for regex in bank.regex_filters:
-            match = re.search(regex, desc, re.M)
+            match = re.search(regex, str(desc), re.M)
             if match:
                 return True
 
@@ -149,13 +157,15 @@ class CompileBanks:
 
         for doc_path in self.get_docs():
             bank = self.get_bank_manifest_from_path(doc_path)
+            print(f"Getting transactions from {bank.name} located at: {doc_path}")
             if not bank:
                 print("Could not match the bank manifest for:", doc_path)
                 continue
 
-            df_nan = pd.read_csv(doc_path)
+            df_nan = pd.read_csv(doc_path)  # To be immediatly changed and forgotten
             df = df_nan.where(pd.notnull(df_nan), None)  # Replaces 'nan' value with None
 
+            # Extracts bank headers into column indexes. Example: Posting date = 1 (second column header)
             self.assign_index_from_col_name(bank, list(df.columns))
 
             for row in df.itertuples(index=False):
@@ -164,7 +174,7 @@ class CompileBanks:
 
                 transaction = Transaction()
                 transaction.bank_name = bank.name
-                transaction.description = row[bank.description]
+                transaction.description = row[bank.description]  #TODO: This line crashes if the columns dont match
 
                 if self.filter_transatction(bank, transaction.description):
                     continue  # Removes anything that should be filtered

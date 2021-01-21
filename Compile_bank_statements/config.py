@@ -1,7 +1,11 @@
 # pylint: disable-all
 from typing import List, Optional, Tuple, Union
 
+DATA_FOLDER = "data"
 # This file is used to specify the bank configurations that are unique as well as globally override categories
+
+# Getting Amazon Purchases
+# https://chrome.google.com/webstore/detail/amazon-order-history-repo/mgkilgclilajckgnedgjgnfdokkgnibi/related?hl=en
 
 # Use the type annotation and comments from this class to better understand its purpose
 class BankColumnMaifest:
@@ -28,13 +32,21 @@ class BankColumnMaifest:
         # Are there headers in this csv
         self.headers: bool = headers
 
-        # The header name (case sensitive) or index
+        ### The header name (case sensitive) or index
+        
+        # The date the transaction was posted or incurred (your preference)
         self.date: Union[str, int] = date
+        
+        # The description of the charge, usually the vendor or seller
         self.description: Union[str, int] = description
+        
+        # The category of this transaction (Food, travel, etc)
         self.category: Optional[Union[str, int]] = category
+        
+        # Debit or credit? This isnt used yet
         self.transaction_type: Optional[Union[str, int]] = transaction_type
 
-        # If debit and credit are seperate columns, use this
+        # If debit and credit are seperate columns, use this. Otherwise NONE
         self.debit_credit: Optional[Tuple[Union[int, str], Union[int, str]]] = debit_credit
 
         # If amount is on one column only, use this
@@ -48,6 +60,7 @@ class BankColumnMaifest:
         # The regex must match the description and amount to match
         # This overwrites the category if the name AND the amount match only on this bank
         # Set the category to NONE to filter this match out
+        # TODO: Set amount to -1 or 0 to apply no amount requirement
         self.amount_category_manifest: List[Tuple[str, float, Optional[str]]] = amount_category_manifest
 
     def __repr__(self):
@@ -69,11 +82,33 @@ class BankColumnMaifest:
 # The bank_name MUST be contained in the csv file name
 BANK_MANIFEST: List[BankColumnMaifest] = [
     BankColumnMaifest(
-        bank_name="Chase",
+        bank_name="AMZN", # Amazon credit card (chase)
         headers=True,
         date="Transaction Date",
         description="Description",
         category="Category",
+        transaction_type="Type",
+        debit_credit=None,
+        amount="Amount",
+        regex_filters=[r"AUTOMATIC PAYMENT - THANK"],
+    ),
+    BankColumnMaifest(
+        bank_name="CHASE_FREE",  # Chase freedom unlimited
+        headers=True,
+        date="Transaction Date",
+        description="Description",
+        category="Category",
+        transaction_type="Type",
+        debit_credit=None,
+        amount="Amount",
+        regex_filters=[r"AUTOMATIC PAYMENT - THANK"],
+    ),
+    BankColumnMaifest(
+        bank_name="CHASE_CH",  # Chase Checking
+        headers=True,
+        date="Posting Date",
+        description="Description",
+        category="Details",
         transaction_type="Type",
         debit_credit=None,
         amount="Amount",
@@ -110,9 +145,9 @@ BANK_MANIFEST: List[BankColumnMaifest] = [
             r"CAPITAL ONE\s*CRCARDPMT",
         ],
         amount_category_manifest=[
-            (r"USAA FUNDS TRANSFER", -750.0, "Savings"),
+            # (r"USAA FUNDS TRANSFER", -750.0, "Savings"),
             (r"USAA FUNDS TRANSFER", -4150.0, "Savings"),
-            (r"USAA FUNDS TRANSFER", -100, None),
+            # (r"USAA FUNDS TRANSFER", -100, None),
         ],
     ),
 ]
@@ -145,4 +180,5 @@ CATEGORY_MANIFEST: List[Tuple[str, str]] = [
     (r"Qt ", "Gas"),
     (r"Vanguard.*Investment", "Investments"),
     (r"Coinbase", "Investments"),
+    (r"Ally Bank.*Transfer", "Savings"),
 ]
