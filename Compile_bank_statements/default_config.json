@@ -1,0 +1,160 @@
+{
+    "banks": [
+        {
+            "bank_name": "AMZN",
+            "headers": true,
+            "date": "Transaction Date",
+            "description": "Description",
+            "category": "Category",
+            "transaction_type": "Type",
+            "amount": "Amount",
+            "regex_filters": [
+                "AUTOMATIC PAYMENT - THANK"
+            ]
+        },
+        {
+            "bank_name": "CHASE_FREE",
+            "headers": true,
+            "date": "Transaction Date",
+            "description": "Description",
+            "category": "Category",
+            "transaction_type": "Type",
+            "amount": "Amount",
+            "regex_filters": [
+                "AUTOMATIC PAYMENT - THANK"
+            ]
+        },
+        {
+            "bank_name": "CHASE_CH",
+            "headers": true,
+            "date": "Posting Date",
+            "description": "Description",
+            "category": "Details",
+            "transaction_type": "Type",
+            "amount": "Amount",
+            "add_comma_to_csv_header": true,
+            "regex_filters": [
+                "AUTOMATIC PAYMENT - THANK"
+            ]
+        },
+        {
+            "bank_name": "CITI",
+            "headers": true,
+            "date": "Date",
+            "description": "Description",
+            "debit_credit": [
+                "Debit",
+                "Credit"
+            ],
+            "regex_filters": [
+                "AUTOPAY.*AUTO-PMT"
+            ]
+        },
+        {
+            "bank_name": "USAA",
+            "headers": false,
+            "date": 2,
+            "description": 4,
+            "category": 5,
+            "amount": 6
+        }
+    ],
+    "category_manifest": [
+        [
+            "In N Out",
+            "Meals Out"
+        ],
+        [
+            "Chipotle",
+            "Meals Out"
+        ],
+        [
+            "5Guys",
+            "Meals Out"
+        ],
+        [
+            "Pei Wei",
+            "Meals Out"
+        ],
+        [
+            "Chick-Fil-A",
+            "Meals Out"
+        ],
+        [
+            "Jamba Juice",
+            "Meals Out"
+        ],
+        [
+            "Mexican Food",
+            "Meals Out"
+        ],
+        [
+            "Ihop ",
+            "Meals Out"
+        ],
+        [
+            "Mr\\. Spicy",
+            "Meals Out"
+        ],
+        [
+            "Baked Bear",
+            "Meals Out"
+        ],
+        [
+            "Freddy's",
+            "Meals Out"
+        ],
+        [
+            "Mongolian Grill",
+            "Meas Out"
+        ],
+        [
+            "Panera Bread",
+            "Meals Out"
+        ],
+        [
+            "Food at",
+            "Meals Out"
+        ],
+        [
+            "Crack Shack",
+            "Meals Out"
+        ],
+        [
+            "Ralphs",
+            "Groceries"
+        ],
+        [
+            "SD Gas Elec",
+            "Power Bill"
+        ],
+        [
+            "ATT\\s*Payment",
+            "Internet"
+        ],
+        [
+            "Gas",
+            "Gas"
+        ],
+        [
+            "Shell Oil",
+            "Gas"
+        ],
+        [
+            "Frys Fuel",
+            "Gas"
+        ],
+        [
+            "Chevron",
+            "Gas"
+        ],
+        [
+            "Arco ",
+            "Gas"
+        ],
+        [
+            "Qt ",
+            "Gas"
+        ]
+    ]
+}

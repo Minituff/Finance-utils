@@ -11,23 +11,25 @@ import pandas as pd
 from dateutil.parser import parse as parsedate
 
 # If using Pylance/Pyright, add the following to the project's vscode settings.json
-#* "python.analysis.extraPaths": ["./Compile_bank_statements"]
-from config import (BANK_MANIFEST, CATEGORY_MANIFEST,  # type:ignore
-                    DATA_FOLDER, BankColumnMaifest)
+# * "python.analysis.extraPaths": ["./Compile_bank_statements"]
+from config import CATEGORY_MANIFEST  # type:ignore
+from config import BANK_MANIFEST, DATA_FOLDER, BankColumnMaifest
 
 
 class Transaction:
     """A dataclass which contains the properites of a transaction"""
+
     def __init__(self) -> None:
         self.date: datetime
         self.amount: float
         self.description: str
         self.category: Optional[str]
         self.bank_name: str
-        
+
     def __repr__(self) -> str:
         return f"{self.bank_name} - {self.amount}$ - {self.date} - {self.description} - {self.category}"
-    
+
+
 class CompileBanks:
     def __init__(self) -> None:
         self.input_path: Path = Path(os.path.dirname(os.path.realpath(__file__)) + "/" + DATA_FOLDER)
@@ -39,7 +41,7 @@ class CompileBanks:
         self.income_output_path: str = os.path.join(self.input_path, "Compiled Income.csv")
 
         self.column_manifest: List[BankColumnMaifest] = BANK_MANIFEST
-        
+
         # If a match is found, replace that category with the string
         self.category_manifest: List[Tuple[str, str]] = CATEGORY_MANIFEST
 
@@ -53,9 +55,9 @@ class CompileBanks:
                 continue
 
             files.append(os.path.join(self.input_path, filename))
-        
+
         if not files:
-            print('No files detected. Plase the statements in the this folder:', self.input_path)
+            print("No files detected. Plase the statements in the this folder:", self.input_path)
         return files
 
     def get_bank_manifest_from_path(self, file_path: str) -> Optional[BankColumnMaifest]:
@@ -79,7 +81,8 @@ class CompileBanks:
                 bank.transaction_type = cols.index(bank.transaction_type)
             if isinstance(bank.amount, str):
                 bank.amount = cols.index(bank.amount)
-            if isinstance(bank.debit_credit, tuple):
+            # Assigns debit and credit columns to indexes
+            if isinstance(bank.debit_credit, (tuple, List)):
                 debit_credit_l = []
                 if isinstance(bank.debit_credit[0], str):
                     debit_credit_l = [cols.index(str(bank.debit_credit[0])), bank.debit_credit[1]]
@@ -89,7 +92,7 @@ class CompileBanks:
                     else:
                         debit_credit_l = [debit_credit_l[0], cols.index(str(bank.debit_credit[1]))]
                 if debit_credit_l:
-                    bank.debit_credit = (debit_credit_l[0], debit_credit_l[1])
+                    bank.debit_credit = [debit_credit_l[0], debit_credit_l[1]]
         except ValueError as e:
             # TODO: Add color here
             print(f"Error with bank: {bank.name}. Ensure the columns in the csv match the bank manifest - {e.args[0]}")
@@ -105,7 +108,7 @@ class CompileBanks:
     @staticmethod
     def get_amount_from_row(bank: BankColumnMaifest, row) -> float:
         if bank.amount:
-            if str(row[bank.amount]).startswith('--'):
+            if str(row[bank.amount]).startswith("--"):
                 return float(row[bank.amount][2:])
             return float(row[bank.amount])
 
@@ -145,24 +148,28 @@ class CompileBanks:
     def update_category_with_amount(bank: BankColumnMaifest, transaction: Transaction) -> None:
         for line, amt, new_cat in bank.amount_category_manifest:
             match = re.search(line, transaction.description, re.I)
-            if match and transaction.amount == amt:
-                if new_cat is None:
-                    transaction.amount = 0.00
-                    transaction.category = "Filtered"
-                else:
+            if match:
+                print(bank.name, match[0])
+                if amt == 0 or amt == -1:  # If the amount is 0/-1 then just change the category
                     transaction.category = new_cat
-                return
+                elif transaction.amount == amt:  # Allows filtering of transactions on the bank of the exact price
+                    if new_cat is None or new_cat is False:
+                        transaction.amount = 0.00
+                        transaction.category = "Filtered"
+                    else:
+                        transaction.category = new_cat
+                    return
 
     @staticmethod
     def add_comma_to_csv_header(doc_path: str) -> None:
-        '''This section of code adds a comma to the first row (headers) in the csv'''
+        """This section of code adds a comma to the first row (headers) in the csv"""
         with open(doc_path, mode="r+") as f:
-            lines=f.readlines()
+            lines = f.readlines()
             f.seek(0)
             line_1 = lines[0].rstrip() + ",\n"
             updated_lines = [line_1] + lines[1:]
             f.writelines(updated_lines)
-                    
+
     def process_docs(self) -> List[Transaction]:
         """Loops over all docs found and returns a list of transaction objects"""
         transaction_list: List[Transaction] = []
@@ -173,10 +180,10 @@ class CompileBanks:
             if not bank:
                 print("Could not match the bank manifest for:", doc_path)
                 continue
-            
-            if (bank.add_comma_to_csv_header is True):
+
+            if bank.add_comma_to_csv_header is True:
                 self.add_comma_to_csv_header(doc_path)
-                 
+
             df_nan = pd.read_csv(doc_path)  # To be immediatly changed and forgotten
             df = df_nan.where(pd.notnull(df_nan), None)  # Replaces 'nan' value with None
 
@@ -189,7 +196,7 @@ class CompileBanks:
 
                 transaction = Transaction()
                 transaction.bank_name = bank.name
-                transaction.description = row[bank.description]  #TODO: This line crashes if the columns dont match
+                transaction.description = row[bank.description]  # TODO: This line crashes if the columns dont match
 
                 if self.filter_transatction(bank, transaction.description):
                     continue  # Removes anything that should be filtered
@@ -222,7 +229,7 @@ class CompileBanks:
             elif transaction.amount < 0:
                 expenes_data.append(data)
             # This excludes items that are $0.00
-           
+
         if income_data:
             income_df = pd.DataFrame(income_data)
             income_df.sort_values(by=["Date"], inplace=True, ascending=True)
@@ -237,6 +244,7 @@ class CompileBanks:
 
 def run():
     CompileBanks().make_df()
-    
+
+
 if __name__ == "__main__":
     run()

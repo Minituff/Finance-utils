@@ -127,3 +127,4 @@ dmypy.json
 /Compile_bank_statements/*.csv
 /Compile_bank_statements/data/*.csv
 .vscode/
+Compile_bank_statements/config.json
