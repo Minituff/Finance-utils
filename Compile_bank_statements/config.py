@@ -24,6 +24,7 @@ class BankColumnMaifest:
         amount: Optional[Union[str, int]],
         regex_filters: List[str] = [],
         amount_category_manifest: List[Tuple[str, float, Optional[str]]] = [],
+        add_comma_to_csv_header: bool = False,
     ) -> None:
 
         # The name of the bank
@@ -48,6 +49,10 @@ class BankColumnMaifest:
 
         # If debit and credit are seperate columns, use this. Otherwise NONE
         self.debit_credit: Optional[Tuple[Union[int, str], Union[int, str]]] = debit_credit
+        
+        # This is an optional feature to fix issues with some bank's csv. This will add a comma to the last header title
+        # If for some reason, your bank CSV cannot be parsed (or is parsed wrong), try setting this to true.
+        self.add_comma_to_csv_header: bool = add_comma_to_csv_header  # Defalt FALSE
 
         # If amount is on one column only, use this
         self.amount: Optional[Union[str, int]] = amount
@@ -112,6 +117,7 @@ BANK_MANIFEST: List[BankColumnMaifest] = [
         transaction_type="Type",
         debit_credit=None,
         amount="Amount",
+        add_comma_to_csv_header=True,
         regex_filters=[r"AUTOMATIC PAYMENT - THANK"],
     ),
     BankColumnMaifest(

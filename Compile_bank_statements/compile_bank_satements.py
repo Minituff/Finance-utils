@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 # pylint: disable-all
 import os
 import re
@@ -8,8 +10,8 @@ from typing import List, Optional, Tuple, Union
 import pandas as pd
 from dateutil.parser import parse as parsedate
 
-# The python language server has issues with local imports
-# * Chaning `config` to `.config` will enable intellisense but breaks the code. Will update once a fix is out
+# If using Pylance/Pyright, add the following to the project's vscode settings.json
+#* "python.analysis.extraPaths": ["./Compile_bank_statements"]
 from config import (BANK_MANIFEST, CATEGORY_MANIFEST,  # type:ignore
                     DATA_FOLDER, BankColumnMaifest)
 
@@ -151,6 +153,16 @@ class CompileBanks:
                     transaction.category = new_cat
                 return
 
+    @staticmethod
+    def add_comma_to_csv_header(doc_path: str) -> None:
+        '''This section of code adds a comma to the first row (headers) in the csv'''
+        with open(doc_path, mode="r+") as f:
+            lines=f.readlines()
+            f.seek(0)
+            line_1 = lines[0].rstrip() + ",\n"
+            updated_lines = [line_1] + lines[1:]
+            f.writelines(updated_lines)
+                    
     def process_docs(self) -> List[Transaction]:
         """Loops over all docs found and returns a list of transaction objects"""
         transaction_list: List[Transaction] = []
@@ -161,7 +173,10 @@ class CompileBanks:
             if not bank:
                 print("Could not match the bank manifest for:", doc_path)
                 continue
-
+            
+            if (bank.add_comma_to_csv_header is True):
+                self.add_comma_to_csv_header(doc_path)
+                 
             df_nan = pd.read_csv(doc_path)  # To be immediatly changed and forgotten
             df = df_nan.where(pd.notnull(df_nan), None)  # Replaces 'nan' value with None
 
