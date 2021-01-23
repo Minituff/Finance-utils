@@ -149,7 +149,6 @@ class CompileBanks:
         for line, amt, new_cat in bank.amount_category_manifest:
             match = re.search(line, transaction.description, re.I)
             if match:
-                print(bank.name, match[0])
                 if amt == 0 or amt == -1:  # If the amount is 0/-1 then just change the category
                     transaction.category = new_cat
                 elif transaction.amount == amt:  # Allows filtering of transactions on the bank of the exact price

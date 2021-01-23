@@ -65,7 +65,7 @@ Banks will often use different formats,columns, and headers when their data is e
     * These files needs to reside `Finance-utils\Compile_bank_statements\data\`
         * If the folder does not exist, create it
 1. Run the script
-    * `Finance-utils> python compile_bank_satements.py`
+    * `Finance-utils> python run.py`
     * Report issues or suggest new features
 
 1. Use Output
