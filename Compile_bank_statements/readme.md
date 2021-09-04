@@ -18,10 +18,11 @@ Banks will often use different formats,columns, and headers when their data is e
             // Does the csv file have headers? If true then "date" "description "category "transaction_type" and "amount can be Strings, otherwise they should correspond with the column starting from 0. If this is false, then you must use index number for columns.
 
             "date": "Transaction Date",  (int|str)
-            // The column name or index where the date is shown
+            // The column name or index (starting from 0) where the date is shown
             
             "description": "Description", (int|str)
             // The column name or index where the description (or title) is shown
+            // Place an empty string "" if the bank does not provide a descption
             
             "category": "Category", (int|str)
             // The column name or index where the item category is shown (Food, travel, etc.)

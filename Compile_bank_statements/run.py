@@ -5,7 +5,7 @@ import os
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
+from typing import Any, List, Optional, Tuple, Union
 
 import pandas as pd
 from dateutil.parser import parse as parsedate
@@ -175,10 +175,10 @@ class CompileBanks:
 
         for doc_path in self.get_docs():
             bank = self.get_bank_manifest_from_path(doc_path)
-            print(f"Getting transactions from {bank.name} located at: {doc_path}")
             if not bank:
                 print("Could not match the bank manifest for:", doc_path)
                 continue
+            print(f"Getting transactions from {bank.name} located at: {doc_path}")
 
             if bank.add_comma_to_csv_header is True:
                 self.add_comma_to_csv_header(doc_path)
@@ -195,8 +195,16 @@ class CompileBanks:
 
                 transaction = Transaction()
                 transaction.bank_name = bank.name
-                transaction.description = row[bank.description]  # TODO: This line crashes if the columns dont match
-
+                
+                try:
+                    if not bank.description or bank.description == "":
+                        transaction.description = ""
+                        
+                    else:
+                        transaction.description = row[bank.description]  # TODO: This line crashes if the columns dont match
+                except:
+                    print(f"Error in bank: ${bank.name}. The configured columns do not match.. Error occured on row ${row}")
+                
                 if self.filter_transatction(bank, transaction.description):
                     continue  # Removes anything that should be filtered
 
