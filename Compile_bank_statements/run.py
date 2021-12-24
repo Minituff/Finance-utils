@@ -95,6 +95,8 @@ class CompileBanks:
                     bank.debit_credit = [debit_credit_l[0], debit_credit_l[1]]
         except ValueError as e:
             # TODO: Add color here
+            if str(e) == "'' is not in list":
+                print('You cannot have bank manifest items with empty strings "". Delete these items and try again.')
             print(f"Error with bank: {bank.name}. Ensure the columns in the csv match the bank manifest - {e.args[0]}")
 
     @staticmethod

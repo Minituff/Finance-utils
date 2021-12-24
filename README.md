@@ -1,6 +1,6 @@
 # Financial Utilities
 
-## Compile_bank_statements
+## [Compile_bank_statements](Compile_bank_statements\readme.md)
 
 Used to take muliple CSV files from your bank and combine them into one master CSV
 
