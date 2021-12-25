@@ -26,6 +26,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+.venv/**
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -125,6 +126,8 @@ dmypy.json
 
 # Ignore any actual statments
 /Compile_bank_statements/*.csv
+/data/*.csv
 /Compile_bank_statements/data/*.csv
 .vscode/
 Compile_bank_statements/config.json
+/config.json
