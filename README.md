@@ -79,7 +79,7 @@ Pandas Version 1.0.1
 
 1. Add bank statements
     * Export bank statements in a `.csv` format and place them into the `data` folder.
-    * These files needs to reside `Finance-utils\Compile_bank_statements\data\`
+    * These files needs to reside `Finance-utils\data\`
         * If the folder does not exist, create it
 1. Run the script
     * `Finance-utils> python run.py`
