@@ -15,9 +15,9 @@ A master `expenses` CSV will be created with the following format:
 These files are grouped either by `purchases` or `expenses`
 
 ## Requirements
-
-* Python 3.8+
-* Pandas Version 1.0.1
+<a href="https://github.com/pypa/pipenv" title="Pipenv Version"><img alt="Pipenv Version" src="https://img.shields.io/github/pipenv/locked/python-version/minituff/Finance-utils"/></a>
+<!-- * https://img.shields.io/github/pipenv/locked/python-version/minituff/Finance-utils -->
+Pandas Version 1.0.1
 
 ## Setup Instructions
 
