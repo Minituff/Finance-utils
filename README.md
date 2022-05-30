@@ -48,6 +48,11 @@ Pandas Version 1.0.1
             
             "amount": "Amount", (int|str) 
             // The column name or index where the transaction amount is stored
+
+            "amount_multiple": "Amount", (int) 
+            // A number which the amount will by multiplied by.
+            // Use 1 to ensure the amount is always positve.
+            // Use -1 to ensure the amount is always negative.
             
             "debit_credit": ["Debit","Credit"], *Optional* (List[int|str])
             /// FORMAT: [debit_column_identifier (int|str) , credit_column_identifier (int|str)]

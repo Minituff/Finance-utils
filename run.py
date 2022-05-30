@@ -112,6 +112,8 @@ class CompileBanks:
         if bank.amount:
             if str(row[bank.amount]).startswith("--"):
                 return float(row[bank.amount][2:])
+            if str(row[bank.amount]).startswith("$"):
+                return float(row[bank.amount][1:])
             return float(row[bank.amount])
 
         if bank.debit_credit:
@@ -209,11 +211,18 @@ class CompileBanks:
                 
                 if self.filter_transatction(bank, transaction.description):
                     continue  # Removes anything that should be filtered
-
+                
+                # Switch to title case AFTER filters have been applied
+                transaction.description = transaction.description.title()
+                
                 transaction.date = self.get_date_from_row(bank, row)
                 transaction.category = row[bank.category] if bank.category else None
                 self.add_category(transaction)
                 transaction.amount = self.get_amount_from_row(bank, row)
+                
+                if bank.amount_multiple and isinstance(bank.amount_multiple, (int, float)):
+                    transaction.amount = abs(transaction.amount) * bank.amount_multiple
+                
                 self.update_category_with_amount(bank, transaction)
                 transaction_list.append(transaction)
 
@@ -228,7 +237,7 @@ class CompileBanks:
         for transaction in transactions:
             data = {
                 "Date": transaction.date,
-                "Item": transaction.description.title(),
+                "Item": transaction.description,  # Title case is applied later
                 "Cost": abs(transaction.amount),
                 "Category": transaction.category,
                 "Bank": transaction.bank_name,

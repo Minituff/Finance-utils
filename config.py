@@ -8,7 +8,7 @@ DATA_FOLDER = "data"
 # This file is used to specify the bank configurations that are unique as well as globally override categories
 
 # Getting Amazon Purchases
-# https://chrome.google.com/webstore/detail/amazon-order-history-repo/mgkilgclilajckgnedgjgnfdokkgnibi/related?hl=en
+# https://www.amazon.com/gp/b2b/reports/
 
 # Use the type annotation and comments from this class to better understand its purpose
 class BankColumnMaifest:
@@ -25,6 +25,7 @@ class BankColumnMaifest:
         transaction_type: Optional[Union[str, int]],
         debit_credit: Optional[List[Union[int, str]]],
         amount: Optional[Union[str, int]],
+        amount_multiple: Optional[int],
         regex_filters: List[str] = [],
         amount_category_manifest: List[Tuple[str, float, Optional[str]]] = [],
         add_comma_to_csv_header: bool = False,
@@ -59,6 +60,11 @@ class BankColumnMaifest:
 
         # If amount is on one column only, use this
         self.amount: Optional[Union[str, int]] = amount
+        
+        # A number which the amount will by multiplied by.
+        # Use 1 to ensure the amount is always positve.
+        # Use -1 to ensure the amount is always negative.
+        self.amount_multiple: Optional[int] = amount_multiple
 
         assert (not debit_credit and amount) or (debit_credit and not amount)  # One of these values must not be None
 
@@ -82,6 +88,7 @@ class BankColumnMaifest:
                 "transaction_type": self.transaction_type,
                 "debit_credit": self.debit_credit,
                 "amount": self.amount,
+                "amount_multiple": self.amount_multiple,
                 "regex_filters": self.regex_filters,
                 "amount_category_manifest": self.amount_category_manifest,
             }
@@ -100,6 +107,7 @@ def get_bank_manifest(j) -> List[BankColumnMaifest]:
             transaction_type=bank_item.get("transaction_type", None),
             debit_credit=bank_item.get("debit_credit", None),
             amount=bank_item.get("amount", None),
+            amount_multiple=bank_item.get("amount_multiple", None),
             regex_filters=bank_item.get("regex_filters", None),
             amount_category_manifest=bank_item.get("amount_category_manifest", []),
             add_comma_to_csv_header=bank_item.get("add_comma_to_csv_header", None),
