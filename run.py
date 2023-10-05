@@ -6,6 +6,7 @@ import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any, List, Optional, Tuple, Union
+from pprint import pprint
 
 import pandas as pd
 from dateutil.parser import parse as parsedate
@@ -13,21 +14,22 @@ from dateutil.parser import parse as parsedate
 # If using Pylance/Pyright, add the following to the project's vscode settings.json
 # * "python.analysis.extraPaths": ["./Compile_bank_statements"]
 from config import CATEGORY_MANIFEST  # type:ignore
-from config import BANK_MANIFEST, DATA_FOLDER, BankColumnMaifest
+from config import BANK_MANIFEST, DATA_FOLDER, BankColumnMaifest, TransactionType
 
 
 class Transaction:
     """A dataclass which contains the properites of a transaction"""
 
     def __init__(self) -> None:
-        self.date: datetime
-        self.amount: float
-        self.description: str
-        self.category: Optional[str]
-        self.bank_name: str
+        self.date: datetime = datetime(2000, 1, 1)
+        self.amount: float = 0
+        self.description: str = ""
+        self.category: Optional[str] = ""
+        self.bank_name: str = ""
+        self.transaction_type: TransactionType = TransactionType.NONE
 
     def __repr__(self) -> str:
-        return f"{self.bank_name} - {self.amount}$ - {self.date} - {self.description} - {self.category}"
+        return f"{self.bank_name} - {self.amount}$ - {self.date} - {self.description} - {self.category} - {self.transaction_type}"
 
 
 class CompileBanks:
@@ -81,6 +83,8 @@ class CompileBanks:
                 bank.transaction_type = cols.index(bank.transaction_type)
             if isinstance(bank.amount, str):
                 bank.amount = cols.index(bank.amount)
+            if isinstance(bank.account_name, str):
+                bank.account_name = cols.index(bank.account_name)
             # Assigns debit and credit columns to indexes
             if isinstance(bank.debit_credit, (tuple, List)):
                 debit_credit_l = []
@@ -179,6 +183,7 @@ class CompileBanks:
 
         for doc_path in self.get_docs():
             bank = self.get_bank_manifest_from_path(doc_path)
+            
             if not bank:
                 print("Could not match the bank manifest for:", doc_path)
                 continue
@@ -198,7 +203,13 @@ class CompileBanks:
                     break  # Stops when a there are no rows with data left
 
                 transaction = Transaction()
-                transaction.bank_name = bank.name
+
+                if bank.aggregator:
+                    transaction.bank_name = row[bank.account_name]
+                else:
+                    transaction.bank_name = bank.name
+                
+                print(transaction.bank_name)
                 
                 try:
                     if not bank.description or bank.description == "":
@@ -213,17 +224,32 @@ class CompileBanks:
                     continue  # Removes anything that should be filtered
                 
                 # Switch to title case AFTER filters have been applied
-                transaction.description = transaction.description.title()
+                transaction.description = str(transaction.description).title()
                 
-                transaction.date = self.get_date_from_row(bank, row)
-                transaction.category = row[bank.category] if bank.category else None
-                self.add_category(transaction)
+                # Amount > 0 == incomne.
+                # Amount < 0 == expense.
                 transaction.amount = self.get_amount_from_row(bank, row)
                 
                 if bank.amount_multiple and isinstance(bank.amount_multiple, (int, float)):
                     transaction.amount = abs(transaction.amount) * bank.amount_multiple
                 
+                
+                if bank.transaction_type is not None:
+                    t_type = str(row[bank.transaction_type]).lower()
+                    if "debit" in t_type:
+                        transaction.amount *= -1
+                    elif "credit" in t_type:
+                        transaction.amount *= 1
+                
+                if transaction.amount == 0:
+                    continue  # Remove any 0$ items
+                
+                transaction.date = self.get_date_from_row(bank, row)
+                transaction.category = row[bank.category] if bank.category else None
+                self.add_category(transaction)
+                
                 self.update_category_with_amount(bank, transaction)
+                
                 transaction_list.append(transaction)
 
         return transaction_list

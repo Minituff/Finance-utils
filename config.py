@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, List, Optional, Tuple, Union
+from strenum import StrEnum
 
 DATA_FOLDER = "data"
 # This file is used to specify the bank configurations that are unique as well as globally override categories
@@ -29,6 +30,8 @@ class BankColumnMaifest:
         regex_filters: List[str] = [],
         amount_category_manifest: List[Tuple[str, float, Optional[str]]] = [],
         add_comma_to_csv_header: bool = False,
+        aggregator: bool = False,
+        account_name: Optional[Union[str, int]] = None,
     ) -> None:
 
         # The name of the bank
@@ -67,6 +70,8 @@ class BankColumnMaifest:
         self.amount_multiple: Optional[int] = amount_multiple
 
         assert (not debit_credit and amount) or (debit_credit and not amount)  # One of these values must not be None
+        
+        assert (debit_credit and not transaction_type) or (transaction_type and not debit_credit) or (not debit_credit and not transaction_type) # Cannot have both of these values
 
         # If the regex matches this string, it will be discarded
         self.regex_filters: List[str] = regex_filters
@@ -76,6 +81,12 @@ class BankColumnMaifest:
         #* Set the category to false to filter this match out
         #* Set amount to -1 or 0 to apply no amount requirement
         self.amount_category_manifest: List[Tuple[str, float, Optional[str]]] = amount_category_manifest
+        
+        # Is this bank an aggregator service that provides transactions for multiple banks?
+        self.aggregator: bool = aggregator
+
+        # Used for aggregator accounts
+        self.account_name: Optional[Union[str, int]] = account_name
 
     def __repr__(self):
         return str(
@@ -91,6 +102,8 @@ class BankColumnMaifest:
                 "amount_multiple": self.amount_multiple,
                 "regex_filters": self.regex_filters,
                 "amount_category_manifest": self.amount_category_manifest,
+                "aggregator": self.aggregator,
+                "account_name": self.account_name,
             }
         )
 
@@ -111,6 +124,8 @@ def get_bank_manifest(j) -> List[BankColumnMaifest]:
             regex_filters=bank_item.get("regex_filters", None),
             amount_category_manifest=bank_item.get("amount_category_manifest", []),
             add_comma_to_csv_header=bank_item.get("add_comma_to_csv_header", None),
+            aggregator=bank_item.get("aggregator", None),
+            account_name=bank_item.get("account_name", None),
         )
         banks.append(bank)
     return banks
@@ -134,3 +149,8 @@ BANK_MANIFEST: List[BankColumnMaifest] = manifests[0]
 
 # This overrides the category of an item if the name matches the regex. Thia applies to ALL banks
 CATEGORY_MANIFEST: List[Tuple[str, str]] = manifests[1]
+
+class TransactionType(StrEnum):
+    DEBIT = "Debit"
+    CREDIT = "Credit"
+    NONE = "None"

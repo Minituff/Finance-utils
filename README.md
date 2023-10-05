@@ -44,7 +44,9 @@ Pandas Version 1.0.1
             // The column name or index where the item category is shown (Food, travel, etc.)
             
             "transaction_type": "Type", *Optional* (int|str)
-            // The column name or index where the transction is shown
+            // The column name or index where the transction type is shown (Debit, Credit)
+            // Use this parameter to tell the script if this was an expense or incomne based off the value in this column
+            // Cannot be combined with the `debit_credit` column
             
             "amount": "Amount", (int|str) 
             // The column name or index where the transaction amount is stored
@@ -96,6 +98,8 @@ Pandas Version 1.0.1
         * `Complied income.csv` Contains all the incoming money transactions (interest paymenyts, etc)
 
 ## Notes
+
+Amazon Order history: https://www.amazon.com/b2b/reports
 
 * The `default_config.json` is ignored and will not be used, feel free to copy it to your `config.json` as a starting point
 
