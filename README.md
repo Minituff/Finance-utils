@@ -17,7 +17,7 @@ These files are grouped either by `purchases` or `expenses`
 ## Running in docker
 
 ```bash
-docker run -v DATA-DIR:/app/finance-utils/data ghcr.io/minituff finance-utils:main
+docker run -v DATA-DIR:/app/finance-utils/data ghcr.io/minituff/finance-utils:main
 ```
 
 The mapped data directory needs to contain:
