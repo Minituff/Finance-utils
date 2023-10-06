@@ -131,3 +131,5 @@ dmypy.json
 .vscode/
 Compile_bank_statements/config.json
 /config.json
+data/config.json
+data-backup

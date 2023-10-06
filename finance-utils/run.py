@@ -209,8 +209,6 @@ class CompileBanks:
                 else:
                     transaction.bank_name = bank.name
                 
-                print(transaction.bank_name)
-                
                 try:
                     if not bank.description or bank.description == "":
                         transaction.description = ""

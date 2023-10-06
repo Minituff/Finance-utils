@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, List, Optional, Tuple, Union
+
 from strenum import StrEnum
 
 DATA_FOLDER = "data"
@@ -134,7 +135,7 @@ def get_bank_manifest(j) -> List[BankColumnMaifest]:
 # The bank_name MUST be contained in the csv file name
 def get_manifests() -> List[Any]:
     '''Reads the config.json'''
-    p = Path(__file__).parent.absolute() / "config.json"
+    p = Path(__file__).parent.absolute() / "data" / "config.json"
     print(f"Opening config at: {p.absolute()}")
     with open(p) as f:
         x = json.load(f)

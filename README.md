@@ -104,3 +104,16 @@ Amazon Order history: https://www.amazon.com/b2b/reports
 * The `default_config.json` is ignored and will not be used, feel free to copy it to your `config.json` as a starting point
 
 * You can also update the `config.py` which allows for full customization
+
+## Running in docker
+
+```bash
+docker run -v C:\Users\James-PC\IdeaProjects\Finance-utils\data:/app/finance-utils/data finance-utils:0.0.1
+```
+
+## Bulding the docker image
+
+```bash
+docker image rm finance-utils:0.0.1 -f
+docker build -t finance-utils:0.0.1 .
+```
