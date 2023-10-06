@@ -14,6 +14,17 @@ A master `expenses` CSV will be created with the following format:
 
 These files are grouped either by `purchases` or `expenses`
 
+## Running in docker
+
+```bash
+docker run -v DATA-DIR:/app/finance-utils/data ghcr.io/minituff finance-utils:main
+```
+
+The mapped data directory needs to contain:
+
+* `config.json`
+* Bank statements ending in `.csv`
+
 ## Setup Instructions
 
 1. Create a `config.json` file (use the *default* as an example)
@@ -84,7 +95,7 @@ These files are grouped either by `purchases` or `expenses`
     * These files needs to reside `Finance-utils\data\`
         * If the folder does not exist, create it
 1. Run the script
-    * `Finance-utils> python run.py`
+    * See [Runing in Docker](#running-in-docker)
     * Report issues or suggest new features
 
 1. Use Output
@@ -100,13 +111,12 @@ Amazon Order history: https://www.amazon.com/b2b/reports
 
 * You can also update the `config.py` which allows for full customization
 
-## Running in docker
+<br>
+<br>
+<br>
+<br>
 
-```bash
-docker run -v C:\Users\James-PC\IdeaProjects\Finance-utils\data:/app/finance-utils/data finance-utils:0.0.1
-```
-
-## Bulding the docker image
+## Bulding the docker image (developers only)
 
 ```bash
 docker image rm finance-utils:0.0.1 -f
